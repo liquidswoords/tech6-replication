@@ -11,7 +11,8 @@ pkgs <- c(
   "fixest",
   "rddensity",
   "modelsummary",
-  "patchwork"
+  "patchwork",
+  "rdrobust"
 )
 
 missing <-setdiff(pkgs, rownames(installed.packages()))
@@ -20,7 +21,8 @@ if (length(missing) > 0) {
   install.packages(missing, repos = "https://cloud.r-project.org")
 }
 
-invisible(lapply(missing, library,character.only=TRUE))
+invisible(lapply(pkgs, library, character.only = TRUE))
+
 
 # 2. Paths ---------------------------------------------------------------------
 
