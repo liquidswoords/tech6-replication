@@ -26,11 +26,11 @@ invisible(lapply(pkgs, library, character.only = TRUE))
 
 # 2. Paths ---------------------------------------------------------------------
 
-path_raw     <- here("data", "raw")
-path_derived <- here("data", "derived")
-path_tables  <- here("output", "tables")
-path_figures <- here("output", "figures")
-path_logs    <- here("output", "logs")
+path_raw     <- here::here("data", "raw")
+path_derived <- here::here("data", "derived")
+path_tables  <- here::here("output", "tables")
+path_figures <- here::here("output", "figures")
+path_logs    <- here::here("output", "logs")
 
 # Create output folders if they do not exist yet
 for (p in c(path_derived, path_tables, path_figures, path_logs)) {
