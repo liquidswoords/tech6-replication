@@ -21,6 +21,7 @@ controls <- c("vshr_islam1994", "partycount", "lpop1994",
 # 3. Building Province Variable for Fixed Effects ------------------------------
 
 # We decide to use 81 provinces (pd_*) rather than pcode, which had 67 provinces
+# pcode is still kept for clustering SEs, as that matches the paper.
 
 df <- df %>%  
   mutate(prov= max.col(as.matrix(select(.,starts_with("pd_")))))
@@ -30,14 +31,30 @@ df <- df %>%
 
 # Cut the sample to the 2629 observation size in paper
 
-df <- df %>%  
+base <- df
+
+df <- base %>%  
   drop_na(i94, iwm94,hischshr1520f, hischshr1520m, all_of(controls))
 
 stopifnot(nrow(df)==2629, sum(df$i94)==315)
 
+
+# Sample used for 2011 in Table VII
+outcomes_2011 <- c("ahischshr15_19f", "ahischshr15_19m",
+                   "ahischshr15_29f", "ahischshr15_29m",
+                   "nevm15_19f", "nevm15_19m")
+
+df11 <- base %>%
+  drop_na(i94, iwm94, all_of(controls), all_of(outcomes_2011))
+
+stopifnot(nrow(df11) == 2338)
+
+
 # 5. Save ----------------------------------------------------------------------
 
 saveRDS(df, file.path(path_derived, "analysis.rds"))
-message("01_clean done: ", nrow(df), " municipalities saved.")
+saveRDS(df11, file.path(path_derived, "analysis_2011.rds"))
 
+message("01_clean done: ", nrow(df), " (2000 sample) and ",
+        nrow(df11), " (2011 sample) municipalities saved.")
 

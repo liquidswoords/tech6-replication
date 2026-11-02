@@ -14,9 +14,10 @@ message("Project Root: ", here::here())
 
 scripts <- c(
   "00_packages",
-  "01_clean"
-  # "10_table1", "11_table2", "12_table3", "13_table7",
-  # "20_fig1", "21_fig2", "22_fig3", "23_fig4",
+  "01_clean",
+  "02_functions",
+  "03_bandwidths"
+  # Remains to be added: Figures & Tables + Extensions
 )
 
 # 2. Run All -------------------------------------------------------------------
@@ -34,3 +35,6 @@ writeLines(capture.output(sessionInfo()),
            here::here("output", "logs", "sessionInfo.txt"))
 
 message("\nAll done.")
+
+
+
