@@ -1,4 +1,4 @@
-# TECH6 Fall 2026 Term Paper
+TECH6 Fall 2026 Term Paper
 # Replication of Meyersson (2014), *Econometrica*
 
 Replicates the sharp RDD estimates of the effect of Islamic Mayors on female education in Turkey, using the 1994 municipal election win margin.
