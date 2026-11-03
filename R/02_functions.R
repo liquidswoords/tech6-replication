@@ -248,7 +248,8 @@ save_docx <- function(tab, file, bold_rows = NULL, size = 8) {
   if (length(bold_rows) > 0) {
     ft <- ft |>
       bold(i = bold_rows, j = 1, part = "body") |>
-      merge_h_range(i = bold_rows, j1 = 1, j2 = ncol(tab), part = "body")
+      merge_h_range(i = bold_rows, j1 = 1, j2 = ncol(tab), part = "body")|>
+      merge_h(i = 1:2, part = "body")
   }
   ft <- autofit(ft)
   save_as_docx(ft, path = file.path(path_tables, file))

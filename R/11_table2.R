@@ -38,6 +38,11 @@ specs <- tribble(
   mutate(hf = mult * h_ik[yf],
          hm = mult * h_ik[ym])
 
+# Outcome labels, looked up by variable name
+outcome_lab <- c(hischshr1520f = "Completed high school in 2000",
+                 studshr1530f  = "Enrollment in 2000")
+cohort_lab  <- c(hischshr1520f = "15-20",
+                 studshr1530f  = "15-30")
 
 # Note on Observations (Panel B, cols 3, 4, 7, 8) (Men regular bandwidth):
 # We get 1342 vs 1341 in the paper. One municipality lies within our bandwidth 
@@ -94,6 +99,8 @@ col_names <- paste0("(", specs$col, ")")
 
 # Header Rows
 header <- rbind(
+  `Outcome`          = unname(outcome_lab[specs$yf]),
+  `Age cohort`       = unname(cohort_lab[specs$yf]),
   `Control function` = c("None", "Linear", "Quadratic", "Cubic")[specs$p + 1],
   `Bandwidth`        = case_when(is.infinite(specs$mult) ~ "Global",
                                  specs$mult == 1   ~ "h",
