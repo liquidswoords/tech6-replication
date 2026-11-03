@@ -23,7 +23,7 @@ p_fig1 <- ggplot(fig1, aes(x = vshr_islam1994, y = iwm94)) +
   geom_hline(yintercept = 0, colour = "grey60", linewidth = 0.6) +
 
   # (2) Towns away from cutoff
-  geom_point(data = filter(fig1, !near_cutoff), colour ="steelblue1", size=0.8) +
+  geom_point(data = filter(fig1, !near_cutoff), colour ="steelblue1", size=0.7) +
              
   # (3) Close elections
   geom_point(data=filter(fig1, near_cutoff), colour = "navyblue", size = 1.0) +

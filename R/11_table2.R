@@ -3,6 +3,9 @@
 #
 # Reproduces Table II from paper
 # Table II: Islamic Rule and High School Education
+#   -panel (a): Women
+#   -panel (b): Men
+#   -panel (c): Test of coefficient equality between women and men
 #
 # Saves as raw .csv and .docx in tech6-replication/output/tables
 #
