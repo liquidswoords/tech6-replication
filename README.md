@@ -1,4 +1,5 @@
 Course: TECH6 Data Science & Econometrics
+
 Semester: Fall 2026
 # Term Paper: Replication of Meyersson (2014), *Econometrica*
 
