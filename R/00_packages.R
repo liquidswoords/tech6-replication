@@ -13,7 +13,7 @@ pkgs <- c(
   "modelsummary",
   "patchwork",
   "rdrobust",
-  "pandoc"
+  "flextable"
 )
 
 missing <-setdiff(pkgs, rownames(installed.packages()))
@@ -24,6 +24,21 @@ if (length(missing) > 0) {
 
 invisible(lapply(pkgs, library, character.only = TRUE))
 
+
+# 1b. Github Only Packages -----------------------------------------------------
+
+# suest (Trenton D. Mize): Seemingly Unrelated (SUR) estimation, used for
+# table II panel C. Not on CRAN  so installed from Github.
+
+
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes", repos = "https://cloud.r-project.org")
+}
+if (!requireNamespace("suest", quietly = TRUE)) {
+  remotes::install_github("tdmize/suest")
+}
+
+library(suest)
 
 # 2. Paths ---------------------------------------------------------------------
 

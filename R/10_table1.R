@@ -98,11 +98,11 @@ t1_tab <- bind_rows(top, bot) %>%
 
 # 5. Save ----------------------------------------------------------------------
 
-# Saved with Raw Values and Table Pastable to MS Word
-
+# CSV Saved with Raw Values
 write_csv(t1, file.path(path_tables, "table1_raw.csv"))
-tinytable::tt(t1_tab) |>
-  tinytable::save_tt(file.path(path_tables, "table1.docx"), overwrite = TRUE)
+
+# Save DOCX pastable to MS Word
+save_docx(t1_tab, "table1.docx")
 
 
 message("10_table1 done: Table I saved to output/tables.")
