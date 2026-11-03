@@ -2,6 +2,9 @@
 # 10_table1.R 
 #
 # Reproduces Table I from paper
+# Table I: Summary Statistics
+#
+# Saves as raw .csv and .docx in tech6-replication/output/tables
 #
 # ==============================================================================
 

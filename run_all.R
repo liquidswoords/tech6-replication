@@ -17,8 +17,10 @@ scripts <- c(
   "01_clean",
   "02_functions",
   "03_bandwidths",
-  "10_table1", "11_table2"
-  # Remains to be added: Figures & Tables + Extensions
+  "10_table1", "11_table2",
+  "20_figure1"
+  
+  # Remains to be added: Table III, Table VII, Figures 2 to 4 + Extensions
 )
 
 # 2. Run All -------------------------------------------------------------------

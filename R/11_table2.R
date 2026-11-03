@@ -2,6 +2,9 @@
 # 11_table2.R 
 #
 # Reproduces Table II from paper
+# Table II: Islamic Rule and High School Education
+#
+# Saves as raw .csv and .docx in tech6-replication/output/tables
 #
 # ==============================================================================
 
