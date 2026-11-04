@@ -25,10 +25,11 @@
 rd_est <- function(data, y, h, p=1, controls=NULL, fe=TRUE, cluster = "pcode") {
   
   # 1. Keep towns inside window
-  d <- data %>% filter(abs(iwm94) < h)
+  s <- if (is.finite(h)) h else 1
+  d <- data %>% filter(abs(iwm94) < h) %>% mutate(x = iwm94 / s)
   
   # 2. Polynomial Terms
-  poly <- if (p == 0) character(0) else paste0("I(iwm94^", 1:p, ")")
+  poly <- if (p == 0) character(0) else paste0("I(x^", 1:p, ")")
   poly <- c(poly, if (p > 0) paste0("i94:", poly))
   
   # 3. Build Formula
