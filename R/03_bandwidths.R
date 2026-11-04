@@ -38,7 +38,9 @@ h_stored <- c(
   nevm15_19m      = 0.2710410439
 )
 
-# 3. Try to install rdd (archived on CRAN), then compute or fall back ----------
+# 3. Try to install rdd (archived on CRAN), ------------------------------------
+
+# Computes IK bandwidths if install sucess, if not falls back to stored values
 
 if (!requireNamespace("rdd", quietly = TRUE)) {
   tryCatch({
