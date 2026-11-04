@@ -19,9 +19,9 @@ Meyersson, E. (2014), Islamic Rule and the Empowerment of the Poor and Pious.
 *Econometrica*, 82: 229-269. https://doi.org/10.3982/ECTA9878
 
 ## Status
-- [x] Table I, Table II
+- [x] Table I, Table II, Table III
 - [x] Figure 1, Figure 2
-- [ ] Table III, Table VII, Figures 3–4
+- [ ] Table VII, Figures 3–4
 - [ ] Extensions
 
 ## Structure
