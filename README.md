@@ -7,7 +7,7 @@ Semester: Fall 2026
 Replicates the sharp RDD estimates of the effect of Islamic Mayors on female education in Turkey, using the 1994 municipal election win margin.
 
 ### Group Members:
-- Aayush Kolhe
+- Aayush M. Kolhe
 - Derek Liang
 
 ### Reproduce 
