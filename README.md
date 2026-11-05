@@ -23,6 +23,9 @@ Meyersson, E. (2014), Islamic Rule and the Empowerment of the Poor and Pious.
 - [x] Figure 1, Figure 2
 - [ ] Table VII, Figures 3–4
 - [ ] Extensions
+- [ ] Report Aayush's part
+- [ ] Report Derek's part
+- [ ] Find extensions
 
 ## Structure
 ```
