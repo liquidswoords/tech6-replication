@@ -224,7 +224,7 @@ rd_plot <- function(data, y, width, window = Inf, title = NULL, ylab = NULL) {
     filter(!is.na(.data[[y]]), !is.na(iwm94), abs(iwm94) < window) %>%
     mutate(side=iwm94 >= 0)
   
-  bins <- bin_means(data, y, width)
+  bins <- bin_means(raw, y, width)
   
   ggplot(raw, aes(x = iwm94, y = .data[[y]], group = side)) +
     stat_smooth(geom = "ribbon", method = "loess",

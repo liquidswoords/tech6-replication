@@ -18,7 +18,7 @@ scripts <- c(
   "02_functions",
   "03_bandwidths",
   "10_table1", "11_table2", "12_table3",
-  "20_figure1", "21_figure2"
+  "20_figure1", "21_figure2", "22_figure3", "23_figure4"
   
   # Remains to be added: Table III, Table VII, Figures 2 to 4 + Extensions
 )
