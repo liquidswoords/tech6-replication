@@ -107,7 +107,6 @@ write_csv(t1, file.path(path_tables, "table1_raw.csv"))
 # Save DOCX pastable to MS Word
 save_docx(t1_tab, "table1.docx")
 
-
 message("10_table1 done: Table I saved to output/tables.")
 
 
