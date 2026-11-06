@@ -214,13 +214,14 @@ mccrary <- function(x, h, c = 0, b = NULL) {
 # rd_plot(): binned means plus a local linear fit with 95% CI on each side
 #   y            outcome name as text
 #   width        bin width for dots
+#   window       half-width of the plotted range (e.g. 0.3); Inf = all data
 #   title, ylab  labels optional
 
 
-rd_plot <- function(data, y, width, title = NULL, ylab = NULL) {
+rd_plot <- function(data, y, width, window = Inf, title = NULL, ylab = NULL) {
   
   raw <- data %>%
-    filter(!is.na(.data[[y]]), !is.na(iwm94)) %>%
+    filter(!is.na(.data[[y]]), !is.na(iwm94), abs(iwm94) < window) %>%
     mutate(side=iwm94 >= 0)
   
   bins <- bin_means(data, y, width)
