@@ -227,15 +227,15 @@ rd_plot <- function(data, y, width, window = Inf, title = NULL, ylab = NULL) {
   bins <- bin_means(raw, y, width)
   
   ggplot(raw, aes(x = iwm94, y = .data[[y]], group = side)) +
+    geom_point(data = bins, aes(x = bin, y = y_mean),
+               inherit.aes = FALSE, size = 1.5, colour = "steelblue1") +
     stat_smooth(geom = "ribbon", method = "loess",
                 method.args = list(degree = 1), formula = y ~ x, level = 0.95,
-                fill = NA, colour = "firebrick", linewidth = 0.3,
+                fill = NA, colour = "grey30", linewidth = 0.3,
                 outline.type = "both") +
     stat_smooth(geom = "line", method = "loess", method.args = list(degree = 1),
                 formula = y ~ x, se = FALSE,
-                colour = "blue", linewidth = 0.7) +
-    geom_point(data = bins, aes(x = bin, y = y_mean),
-               inherit.aes = FALSE, size = 1.5) +
+                colour = "navyblue", linewidth = 0.7) +
     geom_vline(xintercept = 0, linetype = "dashed") +
     labs(title = title, x = "Islamic win margin 1994", y = ylab)
 }
