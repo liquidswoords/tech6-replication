@@ -40,7 +40,7 @@ docs/                 Paper, assignment brief, supplements to paper (found at *E
 
 | Output | Script | Content |
 |---|---|---|
-| Table I | `10_table1.R` | Descriptive statistics by treatment |
+| Table I | `10_table1.R` | Summary Statistics |
 | Table II | `11_table2.R` | Main RD estimates, female vs male education (2000) |
 | Table III | `12_table3.R` | Robustness to polynomial order and bandwidth |
 | Table VII | `13_table7.R` | RD estimates for 2011 outcomes |
@@ -48,16 +48,6 @@ docs/                 Paper, assignment brief, supplements to paper (found at *E
 | Figure 2 | `21_figure2.R` | Density of the running variable, McCrary test |
 | Figure 3 | `22_figure3.R` | Covariate balance at the cutoff |
 | Figure 4 | `23_figure4.R` | Outcomes in 2000 vs 1990 |
-
-## Implementation notes
-
-Specification choices that the paper does not state, recovered by matching published numbers and confirmed against the original Stata do-files (`docs/Recreation data and programmes/`).
-
-1. **Fixed effects and clustering.** Province fixed effects use the 81 current provinces (`pd_*`); standard errors are clustered by the 67 pre-1990s provinces (`pcode`). Only this combination reproduces the published coefficients and SEs.
-2. **Bandwidths.** IK bandwidths follow the 2009 working-paper algorithm via `rdd::IKbandwidth()`. `rdd` is archived on CRAN, so `03_bandwidths.R` installs it from the archive and falls back to stored full-precision values if that fails. One known deviation: men's N in Table II is 1342 vs 1341 in the paper, caused by a single town lying $2 \times 10^{-6}$ inside our bandwidth.
-3. **Figure 2.** Currently estimated on $|X| < 0.5$ with $h = 0.14$, giving $\hat\theta = -0.047$ (paper: $-0.049$, SE 0.161).
-4. **Figures 3 and 4.** Binned means with a loess fit on the main sample. The original uses local linear Epanechnikov smoothing on the full data, so the fitted lines differ slightly.
-5. **Panel C of Table II.** Tests of equal effects for women and men use the `suest` R package (Mize), which reproduces Stata's `suest` with province-clustered cross-equation covariance.
 
 ## Extensions
 
