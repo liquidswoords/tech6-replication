@@ -5,6 +5,9 @@ TECH6 Data Science & Econometrics, NHH, Fall 2026 · Term paper
 
 This repository replicates the sharp regression discontinuity (RD) estimates in Meyersson (2014, *Econometrica*), which uses the 1994 Turkish local elections to estimate the effect of Islamic mayors on female education. The running variable is the 1994 Islamic win margin (`iwm94`), the treatment is an Islamic party mayor winning in 1994 (`i94`). Everything is reproduced in R from the original replication data (`regdata0.dta`).
 
+Link to paper and supplements at `econometricsociety.org`:
+https://www.econometricsociety.org/publications/econometrica/2014/01/01/islamic-rule-and-empowerment-poor-and-pious
+
 ## Quick Start
 
 1. Clone the repository and open `tech6-replication.Rproj` in RStudio
