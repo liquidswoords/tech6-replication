@@ -1,6 +1,7 @@
 # Replication of Meyersson (2014): Islamic Rule and the Empowerment of the Poor and Pious
 
 TECH6 Data Science & Econometrics, NHH, Fall 2026 · Term paper
+
 **Authors:** Aayush M. Kolhe, Derek Liang
 
 This repository replicates the sharp regression discontinuity (RD) estimates in Meyersson (2014, *Econometrica*), which uses the 1994 Turkish local elections to estimate the effect of Islamic mayors on female education. The running variable is the 1994 Islamic win margin (`iwm94`), the treatment is an Islamic party mayor winning in 1994 (`i94`). Everything is reproduced in R from the original replication data (`regdata0.dta`).
