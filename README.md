@@ -45,7 +45,7 @@ docs/                 Paper, assignment brief, supplements to paper (found at *E
 | Table II | `11_table2.R` | Main RD estimates, female vs male education (2000) |
 | Table III | `12_table3.R` | Robustness to polynomial order and bandwidth |
 | Table VII | `13_table7.R` | RD estimates for 2011 outcomes |
-| Figure 1 | `20_figure1.R` | RD plots of the main outcomes |
+| Figure 1 | `20_figure1.R` | Islamic win margin and Islamic vote share in 1994 |
 | Figure 2 | `21_figure2.R` | Density of the running variable, McCrary test |
 | Figure 3 | `22_figure3.R` | Covariate balance at the cutoff |
 | Figure 4 | `23_figure4.R` | Outcomes in 2000 vs 1990 |
