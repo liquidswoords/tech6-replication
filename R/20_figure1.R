@@ -10,10 +10,11 @@
 
 # 1. Load Data -----------------------------------------------------------------
 
-fig1 <- read_dta(file.path(path_raw, "regdata0.dta")) %>%
-  zap_labels() %>%
-  filter(!is.na(vshr_islam1994), !is.na(iwm94)) %>%
-  mutate(near_cutoff = abs(iwm94) < 0.02) # Mark those 2% around the cutoff
+fig1 <- readRDS(file.path(path_derived, "analysis.rds")) %>%
+  filter(vshr_islam1994 < 0.75) %>%     
+  mutate(near_cutoff = abs(iwm94) < 0.02)     
+
+stopifnot(nrow(fig1) == 2627, sum(fig1$near_cutoff) == 100)
 
 # 2. Plot Layers ---------------------------------------------------------------
 
