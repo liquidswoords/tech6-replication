@@ -2,12 +2,13 @@
 # 02_functions.R 
 #
 # Contains following functions:
-#   rd_est()
-#   sur_test()
-#   bin_means()
+#   rd_est() - Main estimation function for local polyonmial RD
+#   sur_test() - Seemingly Unrelated Regressions test
+#   bin_means() - 
 #   bin_density()
 #   ll_density()
 #   mccrary()
+#   mccrary_h()
 #   rd_plot()
 #   save_docx()
 # ==============================================================================
@@ -102,7 +103,7 @@ sur_test <- function(data, yf, ym, hf, hm, p = 1, controls = NULL, fe = TRUE
 
 # 3. Binned Means for RD Plot --------------------------------------------------
 
-# bin_means(): average outcome in equal-width bins of the win margin
+# bin_means(): binned outcome means for RD plots
 #   y         outcome name as text
 #   width     bin width, e.g. 0.04 or 0.08
 
@@ -114,7 +115,7 @@ bin_means <- function(data, y, width) {
     summarise(y_mean = mean(.data[[y]]), n=n(), .groups = "drop")
 }
 
-# 3b. Binned Density for Mcrary ------------------------------------------------
+# 4a. Binned Density for Mcrary ------------------------------------------------
 
 # bin_density(): share of observations per bin, scaled to a density
 #   x            running variable
@@ -140,55 +141,67 @@ bin_density <- function(x, b, c=0) {
          side = if_else(mid < c, "left", "right"))
 }
 
-# 3c. Local linear density at a point ------------------------------------------
+# 4b. Local linear density at a point ------------------------------------------
 
-# ll_density(): local linear estimate of the density at r0
-#   bins        output of bin_density()
+# ll_density(): local linear estimate of the density at r0, with its SE
+#   bins        output of bin_density() (padded on either side)
 #   r0          point to evaluate the density at
 #   h           bandwidth
 #   s           "left" or "right": which side's bins to use
+#   n           Sample Size
+#   b           bin 
+#   c           cutoff
+#   SE is found by the closed form from McCrary's DCdensity package used in 
+#   paper.(Var = fhat * C(m) / (nh))
 
-
-ll_density <- function(bins, r0, h, s) {
+ll_density <- function(bins, r0, s, h, n, b, c=0) {
   
-  # (1) Select bin and set weights
+  # (1) Select bins on side within kernel window
   d <- bins %>%
-    filter(side==s) %>%
-    mutate(w=pmax(0,1 - abs(mid - r0) / h))
+    filter(side == s) %>%
+    mutate(w = pmax(0, 1 - abs(mid - r0) / h)) %>%
+    filter(w > 0)
+  if (nrow(d) < 3) return(c(fhat = NA_real_, se = NA_real_))
   
-  # (2) Only fits with 3+ bins in window
-  if (sum(d$w > 0) < 3) return(c(fhat = NA_real_, se = NA_real_))
+  # (2) Local linear fit
+  X    <- cbind(1, d$mid - r0)
+  l    <- solve(crossprod(X, d$w * X), t(d$w * X))[1, ]
+  fhat <- sum(l * d$dens)
   
-  # (3) Weighted regression of bin heights on distance to r0
-  fit <- lm(dens ~ I(mid - r0), data = d, weights = w)
+  # (3) Closed Form LLR SE (DCdensity.ado)
+  m <- max(-1, min(1, (c - r0) / h))
+  if (s == "left") m <- -m # flip left
+  C <- 12/5 * (2 - 3*m^11 - 24*m^10 - 83*m^9 - 72*m^8 + 42*m^7 + 18*m^6 -
+                 18*m^5 + 18*m^4 - 3*m^3 + 18*m^2 - 15*m) /
+    (1 + m^6 + 6*m^5 - 3*m^4 - 4*m^3 + 9*m^2 - 6*m)^2
   
-  
-  # (4) Density at r0 and standard error for CI
-  c(fhat = unname(coef(fit)[1]),
-    se   = unname(summary(fit)$coefficients[1, 2]))
+
+  c(fhat = fhat, se = sqrt(fhat * C / (n * h)))
 }
 
-# 3d. McCrary (2008) Density Test ----------------------------------------------
+# 4c. McCrary (2008) Density Test ----------------------------------------------
 
 # mccrary(): test for a discontinuity in the density of x at c
 #   x        running variable
-#   h        bandwidth
+#   h        bandwidth; NULL = McCrary default via mccrary_h()
 #   c        cutoff (zero by default)
 #   b        bin width; NULL = Mcrary Default
 
-mccrary <- function(x, h, c = 0, b = NULL) {
+mccrary <- function(x, h = NULL, c = 0, b = NULL) {
 
   # (1) Setup
   x <- x[!is.na(x)]
   n <- length(x)
   if (is.null(b)) b <- 2 * sd(x) * n^(-1/2) 
+  if (is.null(h)) h <- mccrary_h(x, b, c)[["h"]]
   
   # (2) Bin Data
   bins <- bin_density(x, b, c)
   
   # (3) Density immediately on either side of cutoff
-  f_L <- ll_density(bins, c, h, "left")[["fhat"]]
-  f_R <- ll_density(bins, c, h, "right")[["fhat"]]
+  f_L <- ll_density(bins, r0 = c, h = h, s = "left",  n = n, c = c)[["fhat"]]
+  f_R <- ll_density(bins, r0 = c, h = h, s = "right", n = n, c = c)[["fhat"]]
+  
   
   # (4) Test for log jump: 
   theta <- log(f_R) - log(f_L)
@@ -196,20 +209,72 @@ mccrary <- function(x, h, c = 0, b = NULL) {
   z     <- theta / se
   p     <- 2 * pnorm(-abs(z))
 
-  # (5)  Smoothed curve
-  fits  <- map2(bins$mid, bins$side, ~ ll_density(bins, .x, h, .y))
+  # (5)  Smoothed curve: Padding w. empty bins beyond range
+  pad <- ceiling(h / b)
+  lo_mid <- min(bins$mid); hi_mid <- max(bins$mid)
+  bins_p <- bind_rows(
+    tibble(mid= lo_mid - (pad:1) * b, n_k = 0, dens = 0),
+    bins %>% select(mid, n_k, dens),
+    tibble(mid = hi_mid + (1:pad) * b, n_k = 0, dens = 0)
+  ) %>% mutate(side= if_else(mid < c, "left", "right"))
+  
+  
   curve <- bins %>%
-    mutate(fhat = map_dbl(fits, "fhat"),
-           se_f = map_dbl(fits, "se"))
+    mutate(
+      fit  = map2(mid, side, ~ 
+                    ll_density(bins_p, r0 = .x, h = h, s = .y, n = n, c = c)),
+      fhat = map_dbl(fit, "fhat"),
+      se_f = map_dbl(fit, "se")
+    ) %>%
+    select(-fit)
   
   list(theta = theta, se = se, z = z, p = p,
-       f_L=f_L, f_R = f_R,
+       f_L = f_L, f_R = f_R,
        b = b, h = h, n = n, curve = curve)
 }
 
+# 4d. McCrary default bandwidth ------------------------------------------------
+
+# mcrary_h(): Default bandwidth from DCdensity.ado (McCrary 2008), used for 
+#   x running variable
+#   b bin width
+#   c cutoff
 
 
-# 4. RD Plot -------------------------------------------------------------------
+mccrary_h <- function(x, b, c=0) {
+  
+  x <- x[!is.na(x)]
+  n <- length(x)
+  
+  # (1) Bin grid as in DCdensity: j cells starting at midpoint l
+  
+  l <- floor((min(x) - c) / b) * b + b/2 + c         # lowest midpoint
+  r <- floor((max(x) - c) / b) * b + b / 2 + c   # highest midpoint
+  j <- floor((max(x)-min(x)) / b) + 2
+  
+  mid  <- l + (0:(j - 1)) * b
+  k    <- floor((x-c) / b) - floor((min(x) - c) / b) + 1 # Bin Number
+  dens <- tabulate(k, nbins = j) / (n * b) 
+  
+  # (2) Quartic fit on one side
+  side_h <- function(keep, range) {
+    xs  <- mid[keep]
+    ys  <- dens[keep]
+    fit <- lm(ys ~ xs + I(xs^2) + I(xs^3) + I(xs^4))
+    be  <- coef(fit)
+    fpp <- 2 * be[3] + 6 * be[4] * xs + 12 * be[5] * xs^2 # 2nd derivative
+    3.348 * (summary(fit)$sigma^2 * range / sum (fpp^2)) ^ (1/5)
+  }
+  
+  h_L <- side_h(mid < c, c - l)
+  h_R <- side_h(mid > c, r - c)
+  
+  
+  c(h = unname((h_L + h_R) / 2), h_L = unname(h_L), h_R = unname(h_R))
+}
+
+
+# 5. RD Plot -------------------------------------------------------------------
 
 # rd_plot(): binned means plus a local linear fit with 95% CI on each side
 #   y            outcome name as text
@@ -241,7 +306,7 @@ rd_plot <- function(data, y, width, window = Inf, title = NULL, ylab = NULL) {
 }
 
 
-# 5. Save Table to Word --------------------------------------------------------
+# 6. Save Table to Word --------------------------------------------------------
 
 save_docx <- function(tab, file, bold_rows = NULL, size = 8) {
   ft <- flextable(tab) |>
@@ -264,7 +329,8 @@ Functions defined:
 -sur_test() 
 -bin_means()
 -bin_density()
--mccrary()
 -ll_density()
+-mccrary()
+-mccrary_h()
 -rd_plot()
 -save_docx()")

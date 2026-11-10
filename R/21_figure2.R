@@ -5,7 +5,7 @@
 # Figure 2: Is the density of the Islamic win margin continuous at 
 #           the threshold? 
 #
-#   -panel (a): Histogram of Islamic Win Margin (IWM) 1994 (2% bins)
+#   -panel (a): Histogram of Islamic Win Margin (IWM) 1994 (99 bins)
 #   -panel (b): McCrary (2008) test of discontinuity in IWM density 
 #
 # Saves as .pdf and .png in tech6-replication/output/figures
@@ -15,17 +15,22 @@
 # 1. Load Data -----------------------------------------------------------------
 
 
-fig2 <- readRDS(file.path(path_derived, "analysis.rds"))
+fig2 <- read_dta(file.path(path_raw,"regdata0.dta"))
 
-x_all <- fig2$iwm94
+
+x_all <- as.numeric(fig2$iwm94)
+x_all <- x_all[!is.na(x_all)] # Drop rows w. missing running variable
+stopifnot(length(x_all) == 2660) # Check length
+
 
 # 2. Panel (a): Full Range Histogram -------------------------------------------
 
 p_fig2a <- ggplot(tibble(x = x_all), aes(x = x)) +
   
-  # (1) Bars: 2% bins 
+  # (1) Bars: 99 bins over range 
   geom_histogram(aes(y = after_stat(count / sum(count) * 100)),
-                 breaks = seq(-1, 1, by = 0.02),
+                 breaks = seq(min(x_all), max(x_all), length.out = 100),
+                 closed = "left",
                  fill = "steelblue1", colour = "navyblue", linewidth = 0.05) +
   # (2) Cutoff line
   geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.4,
@@ -47,36 +52,35 @@ p_fig2a <- ggplot(tibble(x = x_all), aes(x = x)) +
 
 # 3. McCrary Sample ------------------------------------------------------------
 
-# Panel (b) uses towns with -0.5 < IWM < 0.5. The paper's axis covers only
-# this range, and the density levels only match on this subsample.
-# 2177 is my own count for given window.
 
+# As graphs_R4_final.do (Figure 2B): Towns with non missing outcome and running
+# variable. Trimmed to |IWM| < 0.6. Estimation uses the full 0.6 window
 
-x_res <- x_all[x_all > -0.5 & x_all < 0.5]
-stopifnot(length(x_res) == 2177)
+x_res <- fig2 %>%
+  filter(!is.na(hischshr1520f), !is.na(iwm94)) %>%
+  filter(abs(iwm94) < 0.6) %>%
+  pull(iwm94) %>%
+  as.numeric()
 
+stopifnot(length(x_res) == 2543) # Check
 
 # 4. McCrary Test --------------------------------------------------------------
 
-# Bandwidth not reported in paper. We use McCrary (2008) SE formula to solve for
-# h at the SE published in paper (0.161). Giving us 0.14.
-# McCrary default bandwidth gives us different results from the test.
-#
-# SE ∈ [0.1605, 0.1615) gives h ∈ [0.1395, 0.1413]; 0.14 is the only round value
+# Bandwidth for McCrary test was found in same way as DCdensity.ado in authors
+# replication files. It is the default bandwidth found by fitting quartic on
+# either side. 
 
+# Bin Width selected as McCrary default
 
-h_mc <- 0.14
+mc <- mccrary(x_res)
 
-mc <- mccrary(x_res, h = h_mc)
-
-# Implied bandwidth check: should be close to 0.14
-h_implied <- (24/5) * (1/mc$f_R + 1/mc$f_L) / (mc$n * 0.161^2)
+stopifnot(round(mc$theta, 3) == -0.049, round(mc$se, 3) == 0.161)
 
 # 5. Panel (b): Density Test ---------------------------------------------------
 
 z_band <- 1.96   # 95% CI band
 
-p_fig2b <- ggplot(mc$curve, aes(x = mid)) +
+p_fig2b <- ggplot(mc$curve %>% filter(abs(mid) < 0.5), aes(x = mid),) +
   
   # (1) Bin heights
   geom_point(aes(y = dens), colour = "steelblue1", size = 1.2) +
@@ -125,8 +129,14 @@ ggsave(file.path(path_figures, "figure2.png"), p_fig2,
        width = 5.5, height = 9, dpi = 300)
 
 message(sprintf(paste0(
-  "Figure 2: theta = %.3f (SE %.3f, p = %.2f), b = %.4f, h = %.2f, N = %d. ",
-  "Paper: -0.049 (0.161). Implied h = %.4f."),
-  mc$theta, mc$se, mc$p, mc$b, mc$h, mc$n, h_implied))
+  "Figure 2: theta = %.3f (SE %.3f, p = %.2f), b = %.4f, h = %.4f, N = %d. ",
+  "Paper: -0.049 (0.161)."),
+  mc$theta, mc$se, mc$p, mc$b, mc$h, mc$n))
 
 
+# Save side by side version for write-up
+p_fig2_wide <- (p_fig2a | p_fig2b) &
+  theme(plot.caption = element_text(hjust = 0, size = 10))
+
+ggsave(file.path(path_figures, "figure2_wide.png"), p_fig2_wide,
+       width = 6.5, height = 2.8, dpi = 300)
