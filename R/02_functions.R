@@ -66,6 +66,18 @@ rd_est <- function(data, y, h, p=1, controls=NULL, fe=TRUE, cluster = "pcode") {
 #   controls    vector of control names, or NULL
 #   fe          TRUE adds province fixed effects 
 
+
+# Replicates Stata's suest + test from tables_R4_final.do
+
+#  Uses the suest R package (Trenton D. Mize, GitHub tdmize/suest, pinned in 
+# 00_packages.R)
+# It implements Mize, Doan and Long (2019):
+#  "“A General Framework for Comparing Predictions 
+#   and Marginal Effects Across Models.”
+
+# Models are fit with lm() + factor(prov) rather than feols(), since the
+# package works on lm objects.
+
 sur_test <- function(data, yf, ym, hf, hm, p = 1, controls = NULL, fe = TRUE
                      , cluster="pcode") {
   
@@ -90,7 +102,7 @@ sur_test <- function(data, yf, ym, hf, hm, p = 1, controls = NULL, fe = TRUE
                 observation_id = "mun_id", cluster = cluster)
   b <- coef(comb); V <- vcov(comb)
   
-  # Wald Test
+  #  Wald statistic
   a <- "f::i94"; c <- "m::i94"
   z <- (b[a] - b[c]) / sqrt(V[a, a] + V[c, c] - 2*V[a,c])
   
