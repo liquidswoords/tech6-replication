@@ -115,7 +115,30 @@ p_fig2b <- ggplot(mc$curve %>% filter(abs(mid) < 0.5), aes(x = mid),) +
   theme(plot.subtitle = element_text(hjust = 0.5),
         plot.caption  = element_text(hjust = 0, size = 8))
 
-# 6. Combine and Save ----------------------------------------------------------
+# 6. rddensity check -----------------------------------------------------------
+
+an <-readRDS(file.path(path_derived, "analysis.rds")) # Full analysis sample
+dt_global <- rddensity(X = an$iwm94, c = 0) # N=2629
+
+
+dt_06 <- rddensity(X = x_res, c=0) # 0.6 window, same as McCrary
+
+dt_global_t <- dt_global$test$t_jk
+dt_global_p <- dt_global$test$p_jk
+
+dt_06_t <- dt_06$test$t_jk
+dt_06_p <- dt_06$test$p_jk
+
+
+rdd_tab <- tibble(
+  sample = c("Full analysis sample", "0.6 window (McCrary)"),
+  N      = c(length(an$iwm94), length(x_res)),
+  T      = c(dt_global$test$t_jk, dt_06$test$t_jk),
+  p      = c(dt_global$test$p_jk, dt_06$test$p_jk)
+)
+
+
+# 7. Combine and Save ----------------------------------------------------------
 
 
 p_fig2 <- p_fig2a / p_fig2b
@@ -128,11 +151,16 @@ ggsave(file.path(path_figures, "figure2.pdf"), p_fig2,
 ggsave(file.path(path_figures, "figure2.png"), p_fig2,
        width = 5.5, height = 9, dpi = 300)
 
-message(sprintf(paste0(
-  "Figure 2: theta = %.3f (SE %.3f, p = %.2f), b = %.4f, h = %.4f, N = %d. ",
-  "Paper: -0.049 (0.161)."),
-  mc$theta, mc$se, mc$p, mc$b, mc$h, mc$n))
-
+message(
+  sprintf(paste0(
+    "Figure 2: theta = %.3f (SE %.3f, p = %.2f), b = %.4f, h = %.4f, N = %d. ",
+    "Paper: -0.049 (0.161).\n"),
+    mc$theta, mc$se, mc$p, mc$b, mc$h, mc$n),
+  "rddensity (robust bias-corrected):\n",
+  paste(sprintf("  %-22s N = %4d   T = %6.3f   p = %.3f",
+                rdd_tab$sample, rdd_tab$N, rdd_tab$T, rdd_tab$p),
+        collapse = "\n")
+)
 
 # Save side by side version for write-up
 p_fig2_wide <- (p_fig2a | p_fig2b) &
