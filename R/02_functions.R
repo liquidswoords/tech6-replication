@@ -4,13 +4,13 @@
 # Contains following functions:
 #   rd_est() - Main estimation function for local polyonmial RD
 #   sur_test() - Seemingly Unrelated Regressions test
-#   bin_means() - 
-#   bin_density()
-#   ll_density()
-#   mccrary()
-#   mccrary_h()
-#   rd_plot()
-#   save_docx()
+#   bin_means() - Binned outcome means for RD plots
+#   bin_density() - Binned Density for McCrary
+#   ll_density() - Local linear density at a point
+#   mccrary() - McCrary (2008) Density Test
+#   mccrary_h() - McCrary default bandwidth
+#   rd_plot() - Binned means plus a local linear fit with 95% CI on each side
+#   save_docx() - Save Table to Word
 # ==============================================================================
 
 # 1. RD Estimation Function ----------------------------------------------------
@@ -127,7 +127,7 @@ bin_means <- function(data, y, width) {
     summarise(y_mean = mean(.data[[y]]), n=n(), .groups = "drop")
 }
 
-# 4a. Binned Density for Mcrary ------------------------------------------------
+# 4a. Binned Density for McCrary -----------------------------------------------
 
 # bin_density(): share of observations per bin, scaled to a density
 #   x            running variable
