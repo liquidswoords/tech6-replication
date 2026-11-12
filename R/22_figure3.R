@@ -23,14 +23,7 @@ n_fig3 <- sum(abs(df$iwm94) < 0.3)
 
 stopifnot(n_fig3 == 1248)
 
-# 2. Derive --------------------------------------------------------------------
-df <- df %>%
-    mutate(anyc = as.numeric(merkezi == 1 | merkezp == 1 |
-     subbuyuk == 1 | buyuk == 1))
-
-stopifnot(all(df$anyc %in% c(0, 1)), sum(df$anyc) == 908)
-
-# 3. Spec ----------------------------------------------------------------------
+# 2. Spec ----------------------------------------------------------------------
 
 panels3 <- tribble(
   ~y,                ~ylab,
@@ -44,12 +37,12 @@ panels3 <- tribble(
   "shhs",            "Household size"
 )
 
-# 4. Build ---------------------------------------------------------------------
+# 3. Build ---------------------------------------------------------------------
 
 plots3 <- pmap(panels3, function(y, ylab)
   rd_plot(df, y = y, width = 0.08, window = 0.3, ylab = ylab))
 
-# 5. Assemble ------------------------------------------------------------------
+# 4. Assemble ------------------------------------------------------------------
 
 # y-axis breaks per panel, matching the paper (same order as panels3)
 y_breaks3 <- list(
@@ -84,7 +77,7 @@ p_fig3 <- p_fig3 &
   theme(axis.line  = element_line(colour = "black", linewidth = 0.4),
         axis.ticks = element_line(colour = "black", linewidth = 0.4))
 
-# 6. Save ----------------------------------------------------------------------
+# 5. Save ----------------------------------------------------------------------
 
 ggsave(file.path(path_figures, "figure3.pdf"), p_fig3, 
     width = 7, height = 9)
