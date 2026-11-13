@@ -13,7 +13,8 @@ pkgs <- c(
   "modelsummary",
   "patchwork",
   "rdrobust",
-  "flextable"
+  "flextable",
+  "jsonlite"
 )
 
 missing <-setdiff(pkgs, rownames(installed.packages()))

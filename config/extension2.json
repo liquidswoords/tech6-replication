@@ -1,0 +1,97 @@
+{
+  "_note": "Extension 2 config: single source of truth for R and Python. Index features are measured in 1994 or earlier; RD controls follow Meyersson exactly.",
+
+  "seed": 1234,
+  "n_folds": 5,
+  "inner_folds": 5,
+  "h_main": 0.25,
+
+  "id": "mun_id",
+  "treatment": "i94",
+  "running": "iwm94",
+  "fe": "prov",
+  "cluster": "pcode",
+
+  "outcomes": {
+    "women": "hischshr1520f",
+    "men": "hischshr1520m"
+  },
+
+  "rd_controls": [
+    "vshr_islam1994", "partycount", "lpop1994", "ageshr19", "ageshr60",
+    "sexr", "shhs", "merkezi", "merkezp", "subbuyuk", "buyuk"
+  ],
+
+  "features_strict": [
+    "vshr_islam1994", "partycount",
+    "lpop1994", "lpopdens90", "eduarshr90",
+    "c90ageshr19", "c90ageshr60", "c90sexr", "c90mrf", "c90empf",
+    "merkezi", "merkezp", "subbuyuk", "buyuk"
+  ],
+
+  "features_2000_demographics": ["ageshr19", "ageshr60", "sexr", "shhs"],
+
+  "feature_groups": {
+    "piety": ["vshr_islam1994", "partycount"],
+    "poverty_demography": [
+      "lpop1994", "lpopdens90", "eduarshr90",
+      "c90ageshr19", "c90ageshr60", "c90sexr", "c90mrf", "c90empf"
+    ],
+    "urban": ["merkezi", "merkezp", "subbuyuk", "buyuk"]
+  },
+
+  "pious_var": "vshr_islam1994",
+
+  "targets": {
+    "poor":     {"var": "litshrt",          "train_on": "all",      "exclude_groups": ["piety"]},
+    "barriers": {"var": "c90hischshr1520f", "train_on": "all",      "exclude_groups": ["piety"]},
+    "mu0":      {"var": "hischshr1520f",    "train_on": "controls", "exclude_groups": []}
+  },
+
+  "feature_sets": {
+    "strict":   ["features_strict"],
+    "extended": ["features_strict", "features_2000_demographics"]
+  },
+
+  "learners": {
+    "lasso": {
+      "type": "lasso",
+      "params": {"max_iter": 50000},
+      "grid": {"alpha": {"logspace": [-5, -1, 30]}}
+    },
+    "rf": {
+      "type": "random_forest",
+      "params": {"n_estimators": 300, "n_jobs": -1},
+      "grid": {"min_samples_leaf": [5, 10, 20], "max_features": [0.3, 0.6, 1.0]}
+    }
+  },
+
+  "schemes": {
+    "crossfit_grouped": "Outer GroupKFold by cluster (pcode): each town is predicted by a model that never saw its province",
+    "naive": "Train on all usable towns and predict the same towns: comparison only, shows the overfitting problem"
+  },
+
+  "run": {
+    "targets": ["poor", "barriers", "mu0"],
+    "learners": ["lasso", "rf"],
+    "feature_sets": ["strict", "extended"],
+    "schemes": ["crossfit_grouped", "naive"],
+    "split_seeds": [1234]
+  },
+
+  "main_spec": {
+    "learner": "lasso",
+    "feature_set": "strict",
+    "scheme": "crossfit_grouped",
+    "split_seed": 1234,
+    "_rule": "Fixed before any RD result is seen. Other learners, feature sets and schemes are robustness only."
+  },
+
+  "paths": {
+    "input":         "data/derived/e2_input.csv",
+    "indices":       "data/derived/e2_indices.csv",
+    "diagnostics":   "data/derived/e2_index_diagnostics.csv",
+    "model_details": "data/derived/e2_model_details.csv",
+    "output_dir":    "output/extension2"
+  }
+}
