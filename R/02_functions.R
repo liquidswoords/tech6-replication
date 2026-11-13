@@ -369,7 +369,7 @@ rd_plot <- function(data, y, width, window = Inf, bw = 0.06,
 
 # 6. Save Table to Word --------------------------------------------------------
 
-save_docx <- function(tab, file, bold_rows = NULL, size = 8, dir = path_tables) {
+save_docx <- function(tab, file, bold_rows = NULL, size = 8) {
   ft <- flextable(tab) |>
     fontsize(size = size, part = "all") |>
     padding(padding = 1, part = "all")
@@ -380,9 +380,8 @@ save_docx <- function(tab, file, bold_rows = NULL, size = 8, dir = path_tables) 
       merge_h(i = 1:2, part = "body")
   }
   ft <- autofit(ft)
-  save_as_docx(ft, path = file.path(dir, file))
+  save_as_docx(ft, path = file.path(path_tables, file))
 }
-
 
 
 message("02_functions done.
