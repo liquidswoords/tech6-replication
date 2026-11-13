@@ -43,7 +43,7 @@ panels <- tribble(
 # One ggplot per row of panels. 4-percent bins with a +/- 0.5 window
 
 plots <- pmap(panels, function(y, title, ylab)
-    rd_plot(df, y = y, width = 0.04, window = 0.5, title = title,
+    rd_plot(df, y = y, width = 0.04, window = 0.5, bw = 0.08, title = title,
             ylab = if (nzchar(ylab)) ylab else NULL))
 
 # 4. Assemble ------------------------------------------------------------------

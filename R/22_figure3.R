@@ -40,7 +40,7 @@ panels3 <- tribble(
 # 3. Build ---------------------------------------------------------------------
 
 plots3 <- pmap(panels3, function(y, ylab)
-  rd_plot(df, y = y, width = 0.08, window = 0.3, ylab = ylab))
+  rd_plot(df, y = y, width = 0.08, window = 0.3, bw = 0.06, ylab = ylab))
 
 # 4. Assemble ------------------------------------------------------------------
 

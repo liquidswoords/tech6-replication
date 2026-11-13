@@ -9,6 +9,7 @@
 #   ll_density() - Local linear density at a point
 #   mccrary() - McCrary (2008) Density Test
 #   mccrary_h() - McCrary default bandwidth
+#   ll_smooth() - Local linear smoother, Epanechnikov, fixed bandwidth
 #   rd_plot() - Binned means plus a local linear fit with 95% CI on each side
 #   save_docx() - Save Table to Word
 # ==============================================================================
@@ -285,6 +286,40 @@ mccrary_h <- function(x, b, c=0) {
   c(h = unname((h_L + h_R) / 2), h_L = unname(h_L), h_R = unname(h_R))
 }
 
+# 4e. Local linear smoother (Epanechinkov) -------------------------------------
+
+# ll_smooth(): local linear fit at a fixed bandwidth, replacing Stata's 
+#   lpoly y, x, degree (1) bw(h)  (default kernel = epanechnikov)
+#   x, y    raw (unbinned) data for ONE side of the cutoff
+#   grid    points to evaluate the fit at 
+#   h       bandwidth (0.06 Figure 3, 0.08 Figure 4)
+#   Stata's epanechnikov has support |u| <= sqrt(5), so the effective 
+#   half-window is h * sqrt(5). Kernel constants cancel in WLS. 
+#   SE = sigma_hat * sqrt(sum(l^2)), l the equivalent-kernel weights
+
+ll_smooth <- function(x, y, grid, h) {
+
+  # (1) Fit at one point: WLS with the design centred on x0, 
+  #   so the intercept IS the fitted valye there
+  at <- function(x0) {
+    w <- pmax(0, 1 - ((x - x0) / h)^2 / 5)      # Stata epanechnikov
+    k <- w > 0 
+    if (sum(k) < 3) return(c(fit = NA_real_, l2 = NA_real_))
+    X  <- cbind(1, x[k] - x0)
+    Xw <- w[k] * X
+    l  <- solve(crossprod(X, Xw), t(Xw))[1, ]    # Weights giving the intercept
+    c(fit = sum(l * y[k]), l2 = sum(l^2))
+  }
+
+  # (2) Residual variance, from fitting at each observed x
+  fx   <- vapply(x, function(x0) at (x0)[["fit"]], numeric(1))
+  sig2 <- sum((y - fx)^2, na.rm = TRUE) / (length(y) - 2)
+
+  # (3) Evaluate on the grid
+  out <- vapply(grid, at, numeric(2))
+  tibble(x = grid, fit = out["fit", ], se = sqrt(sig2 * out["l2", ]))
+
+}
 
 # 5. RD Plot -------------------------------------------------------------------
 
@@ -292,10 +327,12 @@ mccrary_h <- function(x, b, c=0) {
 #   y            outcome name as text
 #   width        bin width for dots
 #   window       half-width of the plotted range (e.g. 0.3); Inf = all data
+#   bw           smoother bandwidth (0.06 Figure 3, 0.08 Figure 4)
 #   title, ylab  labels optional
 
 
-rd_plot <- function(data, y, width, window = Inf, title = NULL, ylab = NULL) {
+rd_plot <- function(data, y, width, window = Inf, bw = 0.06,
+                     title = NULL, ylab = NULL) {
   
   raw <- data %>%
     filter(!is.na(.data[[y]]), !is.na(iwm94), abs(iwm94) < window) %>%
@@ -303,18 +340,30 @@ rd_plot <- function(data, y, width, window = Inf, title = NULL, ylab = NULL) {
   
   bins <- bin_means(raw, y, width)
   
-  ggplot(raw, aes(x = iwm94, y = .data[[y]], group = side)) +
+# Local linear fit on each side, on raw (unbinned) data
+
+  curve <- raw %>%
+    group_by(side) %>%
+    group_modify(~ ll_smooth(.x$iwm94, .x[[y]],
+                  grid = seq(min(.x$iwm94), max(.x$iwm94), 
+                              length.out = 100), 
+                  h = bw)) %>%
+
+    ungroup()
+
+
+  ggplot() +
     geom_point(data = bins, aes(x = bin, y = y_mean),
-               inherit.aes = FALSE, size = 1.5, colour = "steelblue1") +
-    stat_smooth(geom = "ribbon", method = "loess",
-                method.args = list(degree = 1), formula = y ~ x, level = 0.95,
-                fill = NA, colour = "grey30", linewidth = 0.3,
-                outline.type = "both") +
-    stat_smooth(geom = "line", method = "loess", method.args = list(degree = 1),
-                formula = y ~ x, se = FALSE,
-                colour = "navyblue", linewidth = 0.7) +
+               size = 1.5, colour = "steelblue1") +
+    geom_line(data = curve, aes(x, fit - 1.96 * se, group = side),
+              colour = "grey30", linewidth = 0.3) +
+    geom_line(data = curve, aes(x, fit + 1.96 * se, group = side),
+              colour = "grey30", linewidth = 0.3) +
+    geom_line(data = curve, aes(x, fit, group = side),
+              colour = "navyblue", linewidth = 0.7) +
     geom_vline(xintercept = 0, linetype = "dashed") +
     labs(title = title, x = "Islamic win margin 1994", y = ylab)
+
 }
 
 
@@ -344,5 +393,6 @@ Functions defined:
 -ll_density()
 -mccrary()
 -mccrary_h()
+-ll_smooth()
 -rd_plot()
 -save_docx()")
