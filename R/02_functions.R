@@ -300,7 +300,7 @@ mccrary_h <- function(x, b, c=0) {
 ll_smooth <- function(x, y, grid, h) {
 
   # (1) Fit at one point: WLS with the design centred on x0, 
-  #   so the intercept IS the fitted valye there
+  #   so the intercept IS the fitted value there
   at <- function(x0) {
     w <- pmax(0, 1 - ((x - x0) / h)^2 / 5)      # Stata epanechnikov
     k <- w > 0 
