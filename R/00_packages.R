@@ -42,14 +42,16 @@ library(suest)
 
 # 2. Paths ---------------------------------------------------------------------
 
-path_raw     <- here::here("data", "raw")
-path_derived <- here::here("data", "derived")
-path_tables  <- here::here("output", "tables")
-path_figures <- here::here("output", "figures")
-path_logs    <- here::here("output", "logs")
+path_raw        <- here::here("data", "raw")
+path_derived    <- here::here("data", "derived")
+path_tables     <- here::here("output", "tables")
+path_figures    <- here::here("output", "figures")
+path_logs       <- here::here("output", "logs")
+path_extension2 <- here::here("output","extension2")
 
 # Create output folders if they do not exist yet
-for (p in c(path_derived, path_tables, path_figures, path_logs)) {
+for (p in c(path_derived, path_tables, path_figures, path_logs, path_extension2
+            )) {
   dir.create(p, showWarnings = FALSE, recursive = TRUE)
 }
 
